@@ -63,3 +63,6 @@ detectando casos de **anemia individual** e consolidando os dados para **identif
 ## 👥 Equipe
 Projeto desenvolvido pelos(as) estudantes da disciplina **INF0483 - Software para Sistemas Ubíquos**  
 Universidade Federal de Goiás (UFG) - 2025/2  
+
+## Arquitetura do Sistema
+![img.png](img.png)
