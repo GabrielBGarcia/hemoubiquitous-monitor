@@ -32,12 +32,6 @@ public class HemogramController {
             Observation observation = (Observation) fhirContext.newJsonParser()
                     .parseResource(Observation.class, hemogramJson);
 
-            System.out.println("Novo Hemograma Recebido:");
-            System.out.println("ID: " + observation.getId());
-            System.out.println("Código: " + observation.getCode().getText());
-            System.out.println("Valor: " + observation.getValue());
-
-
             this.hemogramService.receiveHemogram(observation);
 
         } catch (Exception e) {
