@@ -45,7 +45,6 @@ public class FhirConfig {
         return properties.getProperty("subscription.payload", "application/fhir+json");
     }
 
-    // Método para acessar qualquer propriedade customizada
     public static String getProperty(String key) {
         return properties.getProperty(key);
     }
