@@ -44,10 +44,10 @@ detectando casos de **anemia individual** e consolidando os dados para **identif
 
 ## 🛠️ Tecnologias Utilizadas
 - **Padrões de Saúde**: HL7 FHIR  
-- **Protocolos e Middleware**: MQTT, Apache Kafka, gRPC  
-- **Aplicações Móveis**: Android (Java/Kotlin)  
-- **Infraestrutura**: AWS / Google Cloud  
-- **Banco de Dados**: PostgreSQL / MongoDB  
+- **Protocolos e Middleware**: Apache Kafka
+- **Aplicações Móveis**: Android (React native)  
+- **Infraestrutura**: AWS 
+- **Banco de Dados**: PostgreSQL   
 - **Segurança**: HTTPS, mTLS, criptografia de dados  
 
 ---
@@ -65,4 +65,5 @@ Projeto desenvolvido pelos(as) estudantes da disciplina **INF0483 - Software par
 Universidade Federal de Goiás (UFG) - 2025/2  
 
 ## Arquitetura do Sistema
+
 ![img.png](img.png)
