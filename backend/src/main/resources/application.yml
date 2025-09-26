@@ -1,4 +1,0 @@
-#hapi:
-#  fhir:
-#    subscription:
-#      resthook_enabled: true
