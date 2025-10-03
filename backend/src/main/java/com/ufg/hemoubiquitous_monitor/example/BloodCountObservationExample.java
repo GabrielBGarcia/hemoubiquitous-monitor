@@ -1,6 +1,6 @@
 package com.ufg.hemoubiquitous_monitor.example;
 
-public class ObservationExample {
+public class BloodCountObservationExample {
         public static final String observationExample = """
                 {
                    "resourceType": "Observation",

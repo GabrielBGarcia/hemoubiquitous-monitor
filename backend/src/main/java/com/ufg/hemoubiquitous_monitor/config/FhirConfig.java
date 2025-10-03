@@ -38,7 +38,7 @@ public class FhirConfig {
     }
 
     public static String getSubscriptionEndpoint() {
-        return properties.getProperty("ngrok.dinamic.url") + "/fhir/receptor/hemograma";
+        return properties.getProperty("ngrok.dinamic.url") + "/fhir/receptor/hemoglobin";
     }
 
     public static String getSubscriptionPayload() {

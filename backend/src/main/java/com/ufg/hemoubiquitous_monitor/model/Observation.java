@@ -13,14 +13,14 @@ public class Observation {
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
+    @Column()
+    private String identifier;
+
     @Column(name = "code", nullable = false, length = 50)
     private String code;
 
     @Column(name = "display", length = 255)
     private String display;
-//
-//    @Transient
-//    private Quantity quantity;
 
     @Column(name = "haemoglobin_g_dl")
     private Double haemoglobinInGramsPerLitre;
@@ -30,6 +30,23 @@ public class Observation {
 
     public Observation() {
 
+    }
+
+    public Observation(String identifier, String code, String display, Double haemoglobinInGramsPerLitre, Date createdAt, Boolean hasAnaemia) {
+        this.identifier = identifier;
+        this.code = code;
+        this.display = display;
+        this.haemoglobinInGramsPerLitre = haemoglobinInGramsPerLitre;
+        this.createdAt = createdAt;
+        this.hasAnaemia = hasAnaemia;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Boolean getHasAnaemia() {
@@ -91,13 +108,5 @@ public class Observation {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public Observation(String code, String display, Double haemoglobinInGramsPerLitre, Date createdAt, Boolean hasAnaemia) {
-        this.code = code;
-        this.display = display;
-        this.haemoglobinInGramsPerLitre = haemoglobinInGramsPerLitre;
-        this.createdAt = createdAt;
-        this.hasAnaemia = hasAnaemia;
     }
 }

@@ -1,6 +1,7 @@
 package com.ufg.hemoubiquitous_monitor.controller;
 
-import com.ufg.hemoubiquitous_monitor.example.ObservationExample;
+import com.ufg.hemoubiquitous_monitor.example.BloodCountObservationExample;
+import com.ufg.hemoubiquitous_monitor.example.HemoglobinObservationExample;
 import com.ufg.hemoubiquitous_monitor.service.HemogramService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +26,7 @@ public class HemogramController {
                     name = "hemogramExample",
                     summary = "Exemplo de Observation de Hemograma",
                     description = "Payload JSON que será recebido via REST Hook",
-                    value = ObservationExample.observationExample
+                    value = BloodCountObservationExample.observationExample
             ))) @org.springframework.web.bind.annotation.RequestBody String hemogramJson) {
         try {
             System.out.println(hemogramJson);
@@ -38,9 +39,30 @@ public class HemogramController {
             System.err.println("Erro ao processar hemograma: " + e.getMessage());
         }
     }
+    @PutMapping(value = "/hemoglobin/Observation/{id}", consumes = "application/fhir+json")
+    @Operation(description = "Recebe e persiste exames de hemoglobina")
 
-    @GetMapping(value = "/hemograma/metadata")
-    @PostMapping("/hemograma/metadata")
+    public void receiveHemoglobin(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(examples = @ExampleObject(
+                    name = "hemoglobin",
+                    summary = "Exemplo de Observation de Hemoglobina",
+                    description = "Payload JSON que será recebido via REST Hook",
+                    value = HemoglobinObservationExample.observationExample
+            ))) @org.springframework.web.bind.annotation.RequestBody String hemoglobinJson,
+                                  @PathVariable("id") String id) {
+        try {
+            System.out.println(hemoglobinJson);
+            Observation observation = (Observation) fhirContext.newJsonParser()
+                    .parseResource(Observation.class, hemoglobinJson);
+
+            this.hemogramService.receiveHemoglobin(observation, id);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao processar hemograma: " + e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/hemoglobin/metadata")
     public ResponseEntity<String> metadata() {
         String capabilityStatement = """
         {

@@ -8,6 +8,7 @@ import com.ufg.hemoubiquitous_monitor.config.FhirConfig;
 import org.hl7.fhir.r4.model.*;
 
 public class SubscriptionFactory {
+    private static String createdSubscriptionId;
     public static Subscription createHemogramSubscription() {
         Subscription subscription = new Subscription();
 
@@ -29,6 +30,7 @@ public class SubscriptionFactory {
         subscription.setChannel(channel);
         Subscription createdSubscription = createSubscription(subscription);
         verifySubscription(createdSubscription.getIdElement().getIdPart());
+        createdSubscriptionId = createdSubscription.getIdElement().getIdPart();
         return subscription;
     }
 
@@ -80,5 +82,31 @@ public class SubscriptionFactory {
         } catch (Exception e) {
             System.err.println("❌ Erro ao verificar subscription: " + e.getMessage());
         }
+    }
+
+    public void closeSubscription() {
+            FhirContext ctx = FhirContext.forR4();
+            IGenericClient client = ctx.newRestfulGenericClient("https://hapi.fhir.org/baseR4");
+
+            Subscription subscription = client.read()
+                    .resource(Subscription.class)
+                    .withId(createdSubscriptionId)
+                    .execute();
+
+            // Mudar status para "off"
+            subscription.setStatus(Subscription.SubscriptionStatus.OFF);
+
+            // Atualizar no servidor
+            client.update()
+                    .resource(subscription)
+                    .withId(createdSubscriptionId)
+                    .execute();
+
+    }
+
+    private void setupShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            closeSubscription();
+        }));
     }
 }
