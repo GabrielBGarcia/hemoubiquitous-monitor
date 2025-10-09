@@ -26,6 +26,14 @@ public class HemogramService {
         Quantity quantity = observation.getComponent().stream().filter(component -> component.getCode().getCoding().stream().anyMatch(coding -> "http://loinc.org".equals(coding.getSystem())
                 && "718-7".equals(coding.getCode()))).findFirst().map(Observation.ObservationComponentComponent::getValueQuantity).orElse(null);
 
+        // Validar valor da hemoglobina
+        if (quantity != null && quantity.getValue() != null) {
+            double hemoglobinValue = quantity.getValue().doubleValue();
+            if (hemoglobinValue < 0) {
+                throw new RuntimeException("Valor da hemoglobina não pode ser negativo: " + hemoglobinValue);
+            }
+        }
+
         AnaemiaAnalysisResult anaemiaAnalyzeResult = this.analyzeAneamiaInBloodCount(quantity);
 
         this.saveAnalysisResult(anaemiaAnalyzeResult, "BLOODCOUNT", observation.getIdentifier().get(0).getValue());

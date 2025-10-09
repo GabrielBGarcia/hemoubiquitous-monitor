@@ -1,0 +1,128 @@
+{
+  "resourceType": "Observation",
+  "id": "anemic-cbc-test-001",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "55429-5",
+        "display": "Short blood count panel - Blood"
+      }
+    ],
+    "text": "Hemograma (painel reduzido)"
+  },
+  "subject": {
+    "reference": "Patient/anemic-patient-001",
+    "display": "Paciente Anêmico Teste"
+  },
+  "identifier": [
+    {
+      "value": "anemic-test-001"
+    }
+  ],
+  "effectiveDateTime": "2025-01-06T11:00:00-03:00",
+  "component": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "26464-8",
+            "display": "Leukocytes [#/volume] in Blood"
+          }
+        ],
+        "text": "Leucócitos"
+      },
+      "valueQuantity": {
+        "value": 5.8,
+        "unit": "10*3/uL",
+        "system": "http://unitsofmeasure.org",
+        "code": "10*3/uL"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "26453-1",
+            "display": "Erythrocytes [#/volume] in Blood"
+          }
+        ],
+        "text": "Eritrócitos (RBC)"
+      },
+      "valueQuantity": {
+        "value": 3.2,
+        "unit": "10*6/uL",
+        "system": "http://unitsofmeasure.org",
+        "code": "10*6/uL"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "718-7",
+            "display": "Hemoglobin [Mass/volume] in Blood"
+          }
+        ],
+        "text": "Hemoglobina (Hgb)"
+      },
+      "valueQuantity": {
+        "value": 9.8,
+        "unit": "g/dL",
+        "system": "http://unitsofmeasure.org",
+        "code": "g/dL"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "20570-8",
+            "display": "Hematocrit [Volume Fraction] of Blood by calculation"
+          }
+        ],
+        "text": "Hematócrito (Hct)"
+      },
+      "valueQuantity": {
+        "value": 29.4,
+        "unit": "%",
+        "system": "http://unitsofmeasure.org",
+        "code": "%"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "26515-7",
+            "display": "Platelets [#/volume] in Blood"
+          }
+        ],
+        "text": "Plaquetas"
+      },
+      "valueQuantity": {
+        "value": 180,
+        "unit": "10*3/uL",
+        "system": "http://unitsofmeasure.org",
+        "code": "10*3/uL"
+      }
+    }
+  ]
+}
