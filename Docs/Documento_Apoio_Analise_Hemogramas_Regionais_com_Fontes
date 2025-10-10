@@ -1,0 +1,103 @@
+# Parâmetros Diagnósticos de Anemia segundo OMS e Diretrizes para Análise Regional de Hemogramas
+
+Este documento reúne os parâmetros diagnósticos de anemia conforme o relatório da Organização Mundial da Saúde (OMS, WHO/NMH/NHD/MNM/11.1, 2011) e propõe sua estruturação para a análise de hemogramas considerando fatores regionais como altitude, tabagismo e características ambientais locais que influenciam os níveis de hemoglobina.
+
+---
+
+## 1. Parâmetros para Diagnóstico de Anemia
+
+O principal parâmetro para o diagnóstico de anemia é a **concentração de hemoglobina (Hb)** no sangue. Os valores de corte variam conforme idade, sexo e estado fisiológico (como gravidez).
+
+| População | Não anêmico (g/L) | Anemia leve | Anemia moderada | Anemia grave |
+|------------|-------------------|--------------|------------------|---------------|
+| Crianças 6–59 meses | ≥110 | 100–109 | 70–99 | <70 |
+| Crianças 5–11 anos | ≥115 | 110–114 | 80–109 | <80 |
+| Crianças 12–14 anos | ≥120 | 110–119 | 80–109 | <80 |
+| Mulheres não grávidas (≥15 anos) | ≥120 | 110–119 | 80–109 | <80 |
+| Mulheres grávidas | ≥110 | 100–109 | 70–99 | <70 |
+| Homens (≥15 anos) | ≥130 | 110–129 | 80–109 | <80 |
+
+---
+
+## 2. Ajustes Regionais e Ambientais
+
+As concentrações de hemoglobina variam naturalmente com fatores ambientais e comportamentais, principalmente **altitude** e **tabagismo**. Assim, para que o diagnóstico seja preciso, é necessário ajustar os valores medidos conforme essas condições.
+
+### a) Altitude
+
+Em regiões de maior altitude, a menor pressão de oxigênio estimula o organismo a produzir mais hemoglobina. Portanto, os valores de referência devem ser ajustados subtraindo-se valores específicos da concentração medida.
+
+| Altitude (m) | Ajuste (g/L a subtrair) |
+|---------------|--------------------------|
+| <1000 | 0 |
+| 1000 | 2 |
+| 1500 | 5 |
+| 2000 | 8 |
+| 2500 | 13 |
+| 3000 | 19 |
+| 3500 | 27 |
+| 4000 | 35 |
+| 4500 | 45 |
+
+> Regiões localizadas acima de 2000 metros tendem a apresentar hemoglobinas naturalmente elevadas, o que pode mascarar quadros de anemia se o ajuste não for aplicado.
+
+### b) Tabagismo
+
+O hábito de fumar eleva a hemoglobina devido à exposição crônica ao monóxido de carbono, devendo-se aplicar correções negativas ao valor medido.
+
+| Consumo de cigarros | Ajuste (g/L a subtrair) |
+|----------------------|--------------------------|
+| Não fumante | 0 |
+| ½–1 maço/dia | 3 |
+| 1–2 maços/dia | 5 |
+| ≥2 maços/dia | 7 |
+
+> Em populações com alta prevalência de tabagismo, as médias regionais de hemoglobina podem estar artificialmente elevadas, devendo o software compensar esse viés para evitar subdiagnóstico.
+
+---
+
+## 3. Efeitos Locacionais e Ambientais sobre os Resultados Hematológicos
+
+Além de altitude e tabagismo, outros fatores regionais podem influenciar os níveis de hemoglobina e, portanto, a interpretação do hemograma:
+
+- Clima quente e úmido pode causar **hemodiluição**, reduzindo ligeiramente a concentração de hemoglobina medida.
+- **Desnutrição**, **inflamações crônicas** e **infecções parasitárias** (como malária) podem reduzir a hemoglobina independentemente da deficiência de ferro.
+- **Diferenças genéticas e étnicas regionais** podem causar variações discretas nos valores normais de hemoglobina.
+
+> O sistema de análise regional deve considerar não apenas altitude e tabagismo, mas também as condições de saúde pública e ambientais predominantes.
+
+---
+
+## 4. Classificação de Saúde Pública segundo Prevalência de Anemia (OMS)
+
+| Categoria | Prevalência (%) |
+|------------|----------------|
+| Severa | ≥40 |
+| Moderada | 20.0–39.9 |
+| Leve | 5.0–19.9 |
+| Normal | <5 |
+
+Essas categorias permitem classificar o impacto da anemia em nível populacional, sendo úteis para políticas públicas e estratégias de intervenção.
+
+---
+
+## 5. Considerações Finais
+
+Para garantir **precisão diagnóstica** e **comparabilidade entre regiões**, o sistema de análise de hemogramas deve aplicar automaticamente os ajustes de altitude e tabagismo, além de permitir calibrações específicas para contextos locais.
+
+Essas medidas garantem que a prevalência de anemia seja corretamente estimada, respeitando as variações ambientais e sociais regionais.
+
+---
+
+## 6. Fontes e Referências
+
+1. **World Health Organization (2011).** *Haemoglobin concentrations for the diagnosis of anaemia and assessment of severity.* WHO/NMH/NHD/MNM/11.1.  
+   Disponível em: [https://www.who.int/vmnis/indicators/haemoglobin.pdf](https://www.who.int/vmnis/indicators/haemoglobin.pdf)
+
+2. **WHO, UNICEF, UNU (2001).** *Iron deficiency anaemia: assessment, prevention and control.* Geneva: World Health Organization.
+
+3. **WHO (1989).** *Preventing and controlling anaemia through primary health care.* Geneva: WHO.
+
+4. **WHO (2000).** *The management of nutrition in major emergencies.* Geneva: WHO.
+
+5. **CDC (1989).** *Criteria for anaemia in children and childbearing-aged women.* *Morbidity and Mortality Weekly Report*, 38(22):400–404.
