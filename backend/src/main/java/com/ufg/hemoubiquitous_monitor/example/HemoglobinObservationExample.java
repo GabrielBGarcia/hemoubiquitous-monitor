@@ -137,7 +137,7 @@ public class HemoglobinObservationExample {
                                          },
                                          "high": {
                                              "value": 17.5,
-                                             "system": "http://unitsofmeasure.org",
+                                             "system": "http://unitsofmeasure.or-g",
                                              "code": "g/dL"
                                          },
                                          "type": {

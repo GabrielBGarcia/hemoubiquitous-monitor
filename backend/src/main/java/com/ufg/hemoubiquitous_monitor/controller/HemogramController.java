@@ -4,8 +4,11 @@ import com.ufg.hemoubiquitous_monitor.example.BloodCountObservationExample;
 import com.ufg.hemoubiquitous_monitor.example.HemoglobinObservationExample;
 import com.ufg.hemoubiquitous_monitor.service.HemogramService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,12 @@ import ca.uhn.fhir.context.FhirContext;
 
 @RestController
 @RequestMapping("/fhir/receptor")
+@SecurityScheme(
+        name = "bearerAuth",
+        scheme = "bearer",
+        type = SecuritySchemeType.HTTP,
+        in = SecuritySchemeIn.HEADER
+)
 public class HemogramController {
     private final FhirContext fhirContext = FhirContext.forR4();
     @Autowired
