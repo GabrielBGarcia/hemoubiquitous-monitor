@@ -3,6 +3,7 @@ package com.ufg.hemoubiquitous_monitor.controller;
 import com.ufg.hemoubiquitous_monitor.example.BloodCountObservationExample;
 import com.ufg.hemoubiquitous_monitor.example.HemoglobinObservationExample;
 import com.ufg.hemoubiquitous_monitor.service.HemogramService;
+import com.ufg.hemoubiquitous_monitor.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -25,8 +26,13 @@ import ca.uhn.fhir.context.FhirContext;
 )
 public class HemogramController {
     private final FhirContext fhirContext = FhirContext.forR4();
+
     @Autowired
     private HemogramService hemogramService;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     @PostMapping(value = "/hemograma", consumes = "application/fhir+json")
     @Operation(description = "Recebe e persiste hemogramas")
@@ -73,6 +79,7 @@ public class HemogramController {
 
     @GetMapping(value = "/hemoglobin/metadata")
     public ResponseEntity<String> metadata() {
+        this.notificationService.notifyEpidemicSuspect("GO", "GOIANIA");
         String capabilityStatement = """
         {
           "resourceType": "CapabilityStatement",

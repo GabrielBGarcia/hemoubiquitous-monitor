@@ -1,12 +1,13 @@
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://localhost:8080/notify'
+    brokerURL: 'ws://localhost:8080/hemoubiquitous-websocket'
 });
 
 stompClient.onConnect = (frame) => {
     setConnected(true);
     console.log('Connected: ' + frame);
-    stompClient.subscribe('/topic/teste', (greeting) => {
-        showGreeting(JSON.parse(greeting.body).content);
+    stompClient.subscribe('/topic/notify/GO/GOIANIA', (greeting) => {
+        // showGreeting(JSON.parse(greeting.body).content);
+        document.querySelector("#teste-websocket").innerHTML += greeting.body + "<br/>";
     });
 };
 
