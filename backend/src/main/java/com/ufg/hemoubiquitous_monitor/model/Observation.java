@@ -1,7 +1,6 @@
 package com.ufg.hemoubiquitous_monitor.model;
 
 import jakarta.persistence.*;
-import org.hl7.fhir.r4.model.Quantity;
 
 import java.util.Date;
 
@@ -28,6 +27,13 @@ public class Observation {
     @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
+    @Column(name = "issued_at")
+    private Date issuedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_data_id")
+    private PatientData patientData;
+
     public Observation() {
 
     }
@@ -39,6 +45,14 @@ public class Observation {
         this.haemoglobinInGramsPerLitre = haemoglobinInGramsPerLitre;
         this.createdAt = createdAt;
         this.hasAnaemia = hasAnaemia;
+    }
+
+    public PatientData getPatientData() {
+        return patientData;
+    }
+
+    public void setPatientData(PatientData patientData) {
+        this.patientData = patientData;
     }
 
     public String getIdentifier() {
@@ -108,5 +122,13 @@ public class Observation {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Date getIssuedAt() {
+        return issuedAt;
+    }
+
+    public void setIssuedAt(Date issuedAt) {
+        this.issuedAt = issuedAt;
     }
 }

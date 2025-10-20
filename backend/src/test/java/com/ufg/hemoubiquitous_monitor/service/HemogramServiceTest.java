@@ -5,6 +5,7 @@ import com.ufg.hemoubiquitous_monitor.exception.InvalidHemoglobinException;
 import com.ufg.hemoubiquitous_monitor.model.AnaemiaAnalysisResult;
 import com.ufg.hemoubiquitous_monitor.repository.ObservationRepository;
 import com.ufg.hemoubiquitous_monitor.util.TestDataLoader;
+import com.ufg.hemoubiquitous_monitor.repository.PatientDataRepository;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class HemogramServiceTest {
 
     @Mock
     private ObservationRepository observationRepository;
+
+    @Mock
+    private PatientDataRepository patientDataRepository;
 
     @InjectMocks
     private HemogramService hemogramService;
@@ -187,7 +191,11 @@ class HemogramServiceTest {
         String origin = "TEST_ORIGIN";
         String id = "test-id-001";
 
-        hemogramService.saveAnalysisResult(result, origin, id);
+        // Monta Observation FHIR com o identifier esperado
+        Observation fhirObservation = new Observation();
+        fhirObservation.addIdentifier().setValue(id);
+
+        hemogramService.saveAnalysisResult(result, origin, fhirObservation);
 
         verify(observationRepository, times(1)).save(argThat(observation ->
             observation.getIdentifier().equals(id) &&
