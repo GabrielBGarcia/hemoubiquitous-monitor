@@ -2,18 +2,20 @@ package com.ufg.hemoubiquitous_monitor.service;
 
 import com.google.firebase.messaging.*;
 import com.ufg.hemoubiquitous_monitor.model.EpidemicNotification;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import com.ufg.hemoubiquitous_monitor.exception.FirebaseMessagingException;
 
 import java.util.List;
 
 @Service
 public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
+    private final FirebaseMessaging firebaseMessaging;
 
-    public NotificationService(SimpMessagingTemplate messagingTemplate) {
+    public NotificationService(SimpMessagingTemplate messagingTemplate, FirebaseMessaging firebaseMessaging) {
         this.messagingTemplate = messagingTemplate;
+        this.firebaseMessaging = firebaseMessaging;
     }
 
     public void notifyEpidemicSuspect(String uf, String region) {
@@ -33,7 +35,7 @@ public class NotificationService {
         try {
             String response = FirebaseMessaging.getInstance().send(message);
             System.out.println("Notificação enviada: " + response);
-        } catch (FirebaseMessagingException e) {
+        } catch (FirebaseMessagingException | com.google.firebase.messaging.FirebaseMessagingException e) {
             e.printStackTrace();
         }
     }
@@ -48,10 +50,31 @@ public class NotificationService {
                 .build();
 
         try {
-            FirebaseMessaging.getInstance().send(message);
-        } catch (FirebaseMessagingException e) {
+             firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException | com.google.firebase.messaging.FirebaseMessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    public void subscribeToTopic(String token, String topic) throws FirebaseMessagingException, com.google.firebase.messaging.FirebaseMessagingException {
+        TopicManagementResponse response = firebaseMessaging
+                .subscribeToTopic(List.of(token), topic);
+
+        if (response.getFailureCount() > 0) {
+            System.out.println(response.getErrors());
+            throw new FirebaseMessagingException("Falha ao inscrever no tópico");
+        }
+    }
+
+
+    public void unsubscribeFromTopic(String token, String topic) throws FirebaseMessagingException, com.google.firebase.messaging.FirebaseMessagingException {
+        TopicManagementResponse response = FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic(List.of(token), topic);
+
+        if (response.getFailureCount() > 0) {
+            throw new FirebaseMessagingException("Falha ao desinscrever do tópico");
+        }
+        System.out.println("Token removido do tópico: " + topic);
     }
 
     public void sendToMultipleDevices(List<String> tokens, String title, String body) {
@@ -67,7 +90,7 @@ public class NotificationService {
             BatchResponse response = FirebaseMessaging.getInstance()
                     .sendMulticast(message);
             System.out.println(response.getSuccessCount() + " mensagens enviadas");
-        } catch (FirebaseMessagingException e) {
+        } catch (FirebaseMessagingException | com.google.firebase.messaging.FirebaseMessagingException e) {
             e.printStackTrace();
         }
     }

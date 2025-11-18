@@ -79,7 +79,7 @@ public class HemogramController {
 
     @GetMapping(value = "/hemoglobin/metadata")
     public ResponseEntity<String> metadata() {
-        this.notificationService.notifyEpidemicSuspect("GO", "GOIANIA");
+//        this.notificationService.notifyEpidemicSuspect("GO", "GOIANIA");
         String capabilityStatement = """
         {
           "resourceType": "CapabilityStatement",

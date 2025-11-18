@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class AnaemiaAnalyticsService {
     @Autowired private ObservationRepository observationRepository;
     @Autowired private AnaemiaGeoAggregateRepository aggregateRepository;
+    @Autowired private NotificationService notificationService;
     @Autowired(required = false) private com.ufg.hemoubiquitous_monitor.config.AnalyticsProperties analyticsProperties;
 
     /** 
@@ -147,6 +148,28 @@ public class AnaemiaAnalyticsService {
         th.thresholdPrevalence = req.thresholdPrevalence; th.thresholdTrendDelta = req.thresholdTrendDelta; th.clusterMinCases = req.clusterMinCases;
         dto.thresholdsUsed = th;
         dto.loinc = req.loinc; dto.generatedAt = new Date();
+
+        if ("major".equals(severity)) {
+            try {
+                Map<String, String> data = new HashMap<>();
+                data.put("areaKey", areaKey);
+                data.put("areaType", areaType);
+                data.put("prevalence", String.valueOf(prevalence));
+                data.put("severity", severity);
+                data.put("deltaPercent", deltaPercent != null ? String.valueOf(deltaPercent) : "0");
+                data.put("total", String.valueOf(total));
+                data.put("anaemic", String.valueOf(anaemic));
+
+                notificationService.sendToTopic(
+                        "anaemia-alerts"+ "-" + areaKey,
+                        "Alerta de Anemia Crítico",
+                        String.format("Prevalência de %.1f%% detectada em %s", prevalence * 100)
+                );
+
+            } catch (Exception e) {
+                System.err.println("Erro ao enviar notificação push: " + e.getMessage());
+            }
+        }
 
         return dto;
     }

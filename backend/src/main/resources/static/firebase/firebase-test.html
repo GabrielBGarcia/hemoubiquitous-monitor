@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste FCM</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input, button { padding: 10px; margin: 5px; width: 100%; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #token, #result { background-color: #f0f0f0; padding: 10px; word-break: break-all; min-height: 40px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+    <script src="./firebase-test.js"></script>
+    <script src="./firebase-messaging-sw.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+</head>
+<body>
+<h1>Teste Firebase Cloud Messaging</h1>
+
+<div class="container">
+    <h2>1. Token do Dispositivo</h2>
+    <button onclick="requestPermission()">Obter Token FCM</button>
+    <div id="token"></div>
+</div>
+
+<div class="container">
+    <h2>2. Inscrever em Tópico</h2>
+    <input type="text" id="subscribeTopic" placeholder="Nome do tópico (ex: epidemias)" value="epidemias">
+    <button onclick="subscribeToTopic()">Inscrever</button>
+</div>
+
+<div class="container">
+    <h2>3. Enviar Notificação para Dispositivo</h2>
+    <input type="text" id="deviceTitle" placeholder="Título" value="Teste Direto">
+    <input type="text" id="deviceBody" placeholder="Mensagem" value="Notificação enviada diretamente">
+    <button onclick="sendToDevice()">Enviar para Dispositivo</button>
+</div>
+
+<div class="container">
+    <h2>4. Enviar para Tópico</h2>
+    <input type="text" id="topicName" placeholder="Nome do tópico" value="epidemias">
+    <input type="text" id="topicTitle" placeholder="Título" value="Alerta de Epidemia">
+    <input type="text" id="topicBody" placeholder="Mensagem" value="Suspeita de epidemia detectada">
+    <button onclick="sendToTopic()">Enviar para Tópico</button>
+</div>
+
+<div class="container">
+    <h2>Resultado</h2>
+    <div id="result"></div>
+</div>
+</body>
+</html>
