@@ -2,6 +2,7 @@ package com.ufg.hemoubiquitous_monitor.controller;
 
 import com.ufg.hemoubiquitous_monitor.example.BloodCountObservationExample;
 import com.ufg.hemoubiquitous_monitor.example.HemoglobinObservationExample;
+import com.ufg.hemoubiquitous_monitor.example.HemoglobinObservationExampleWithPatientData;
 import com.ufg.hemoubiquitous_monitor.service.HemogramService;
 import com.ufg.hemoubiquitous_monitor.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,9 +61,9 @@ public class HemogramController {
     public void receiveHemoglobin(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             content = @Content(examples = @ExampleObject(
                     name = "hemoglobin",
-                    summary = "Exemplo de Observation de Hemoglobina",
+                    summary = "Exemplo de Observation de Hemoglobina com Dados do Paciente",
                     description = "Payload JSON que será recebido via REST Hook",
-                    value = HemoglobinObservationExample.observationExample
+                    value = HemoglobinObservationExampleWithPatientData.observationExample
             ))) @org.springframework.web.bind.annotation.RequestBody String hemoglobinJson,
                                   @PathVariable("id") String id) {
         try {

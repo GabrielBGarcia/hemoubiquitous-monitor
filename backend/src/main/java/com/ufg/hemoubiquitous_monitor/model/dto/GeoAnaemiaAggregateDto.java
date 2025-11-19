@@ -14,6 +14,7 @@ public class GeoAnaemiaAggregateDto {
     public Metrics metrics;
     public List<TimeBucket> timeSeries;
     public List<Cluster> clusters;
+    public Breakdown breakdown;
     public Thresholds thresholdsUsed;
     public String loinc;
     public Date generatedAt;
@@ -50,6 +51,25 @@ public class GeoAnaemiaAggregateDto {
         public Center centroid; public Double clusterRadiusKm;
         public Long cases; public Long anaemic; public Double prevalence;
         public String geohash; public String severity;
+    }
+
+    public static class Breakdown {
+        public String type; // by-state, by-city
+        public List<StateBreakdown> states;
+        public List<CityBreakdown> cities;
+    }
+
+    public static class StateBreakdown {
+        public String state;
+        public Metrics metrics;
+        public List<TimeBucket> timeSeries;
+    }
+
+    public static class CityBreakdown {
+        public String city;
+        public String state;
+        public Metrics metrics;
+        public List<TimeBucket> timeSeries;
     }
 
     public static class Thresholds {

@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "analytics")
 public class AnalyticsProperties {
     private String windowDefault = "PT24H"; // janela padrão (ISO-8601 duration)
-    private String bucketDefault = "15m";  // granularidade padrão da série temporal
+    private String bucketDefault = "1h";  // granularidade padrão da série temporal
     private String loincDefault = "718-7"; // hemoglobina
 
     private Double thresholdPrevalence = 0.15; // 15%

@@ -142,14 +142,22 @@ public class AnaemiaAnalyticsService {
         dto.metrics.total = total; dto.metrics.anaemic = anaemic; dto.metrics.prevalence = prevalence;
         dto.metrics.baselinePrevalence = baselinePrevalence; dto.metrics.deltaPrevalence = deltaPrevalence; dto.metrics.deltaPercent = deltaPercent;
         dto.metrics.severity = severity; dto.metrics.minSamples = req.minSamples; dto.metrics.minDistinctPatients = req.minDistinctPatients;
-    dto.timeSeries = series;
+        dto.timeSeries = series;
     dto.clusters = detectClusters(inWindow, req);
+        
+        // Adicionar breakdown conforme o tipo de área
+        if ("global".equals(areaType)) {
+            // Breakdown por estado quando área é global
+            dto.breakdown = buildStateBreakdown(inWindow, inBaseline, from, to, req);
+        } else if ("admin-area".equals(areaType) && req.state != null && req.city == null) {
+            // Breakdown por cidade quando área é um estado específico
+            dto.breakdown = buildCityBreakdown(inWindow, inBaseline, from, to, req.state, req);
+        }
+        
         GeoAnaemiaAggregateDto.Thresholds th = new GeoAnaemiaAggregateDto.Thresholds();
         th.thresholdPrevalence = req.thresholdPrevalence; th.thresholdTrendDelta = req.thresholdTrendDelta; th.clusterMinCases = req.clusterMinCases;
         dto.thresholdsUsed = th;
-        dto.loinc = req.loinc; dto.generatedAt = new Date();
-
-        if ("major".equals(severity)) {
+        dto.loinc = req.loinc; dto.generatedAt = new Date();        if ("major".equals(severity)) {
             try {
                 Map<String, String> data = new HashMap<>();
                 data.put("areaKey", areaKey);
@@ -236,6 +244,28 @@ public class AnaemiaAnalyticsService {
             }
             dto.timeSeries = series;
             dto.clusters = Collections.emptyList(); // clusters não persistidos nesta versão
+
+            // Recalcular breakdown quando reutilizar agregados
+            List<Observation> observations = observationRepository.findByIssuedAtBetween(df, dt);
+            List<Observation> inWindow = observations.stream()
+                .filter(o -> matchArea(o.getPatientData(), req))
+                .filter(o -> matchLoinc(o.getCode(), req.loinc))
+                .collect(Collectors.toList());
+
+            List<Observation> baselineCandidates = observationRepository.findByIssuedAtBetween(Date.from(baselineFrom), Date.from(baselineTo));
+            List<Observation> inBaseline = baselineCandidates.stream()
+                .filter(o -> matchArea(o.getPatientData(), req))
+                .filter(o -> matchLoinc(o.getCode(), req.loinc))
+                .collect(Collectors.toList());
+
+            // Adicionar breakdown conforme o tipo de área
+            if ("global".equals(summary.getAreaType())) {
+                // Breakdown por estado quando área é global
+                dto.breakdown = buildStateBreakdown(inWindow, inBaseline, from, to, req);
+            } else if ("admin-area".equals(summary.getAreaType()) && req.state != null && req.city == null) {
+                // Breakdown por cidade quando área é um estado específico
+                dto.breakdown = buildCityBreakdown(inWindow, inBaseline, from, to, req.state, req);
+            }
 
             GeoAnaemiaAggregateDto.Thresholds th = new GeoAnaemiaAggregateDto.Thresholds();
             th.thresholdPrevalence = req.thresholdPrevalence; th.thresholdTrendDelta = req.thresholdTrendDelta; th.clusterMinCases = req.clusterMinCases;
@@ -522,5 +552,147 @@ public class AnaemiaAnalyticsService {
         if (highPrev) return "minor";
         if (rising) return "minor";
         return "none";
+    }
+
+    /**
+     * Gera breakdown por estado quando a área é global.
+     * Agrupa observações por estado e calcula métricas + série temporal para cada um.
+     */
+    private GeoAnaemiaAggregateDto.Breakdown buildStateBreakdown(
+            List<Observation> inWindow,
+            List<Observation> inBaseline,
+            Instant from,
+            Instant to,
+            AnalyticsRunRequest req) {
+        
+        // Agrupar observações por estado
+        Map<String, List<Observation>> byState = inWindow.stream()
+                .filter(o -> o.getPatientData() != null && o.getPatientData().getState() != null)
+                .collect(Collectors.groupingBy(o -> o.getPatientData().getState()));
+
+        // Agrupar baseline por estado
+        Map<String, List<Observation>> baselineByState = inBaseline.stream()
+                .filter(o -> o.getPatientData() != null && o.getPatientData().getState() != null)
+                .collect(Collectors.groupingBy(o -> o.getPatientData().getState()));
+
+        List<GeoAnaemiaAggregateDto.StateBreakdown> stateList = new ArrayList<>();
+
+        for (Map.Entry<String, List<Observation>> entry : byState.entrySet()) {
+            String state = entry.getKey();
+            List<Observation> stateObs = entry.getValue();
+            List<Observation> stateBaseline = baselineByState.getOrDefault(state, Collections.emptyList());
+
+            // Calcular métricas do estado
+            long total = stateObs.size();
+            long anaemic = stateObs.stream().filter(Observation::getHasAnaemia).count();
+            Double prevalence = total > 0 ? (double) anaemic / (double) total : 0.0;
+
+            long baselineTotal = stateBaseline.size();
+            long baselineAnaemic = stateBaseline.stream().filter(Observation::getHasAnaemia).count();
+            Double baselinePrevalence = baselineTotal > 0 ? (double) baselineAnaemic / (double) baselineTotal : 0.0;
+            Double deltaPrevalence = prevalence - baselinePrevalence;
+            Double deltaPercent = baselinePrevalence > 0 ? deltaPrevalence / baselinePrevalence : null;
+
+            String severity = classifySeverity(prevalence, deltaPercent, req);
+
+            // Criar objeto StateBreakdown
+            GeoAnaemiaAggregateDto.StateBreakdown sb = new GeoAnaemiaAggregateDto.StateBreakdown();
+            sb.state = state;
+            
+            sb.metrics = new GeoAnaemiaAggregateDto.Metrics();
+            sb.metrics.total = total;
+            sb.metrics.anaemic = anaemic;
+            sb.metrics.prevalence = prevalence;
+            sb.metrics.baselinePrevalence = baselinePrevalence;
+            sb.metrics.deltaPrevalence = deltaPrevalence;
+            sb.metrics.deltaPercent = deltaPercent;
+            sb.metrics.severity = severity;
+
+            // Série temporal por estado
+            sb.timeSeries = buildBuckets(stateObs, from, to, req.bucket);
+
+            stateList.add(sb);
+        }
+
+        // Ordenar por total decrescente
+        stateList.sort((a, b) -> Long.compare(b.metrics.total, a.metrics.total));
+
+        GeoAnaemiaAggregateDto.Breakdown breakdown = new GeoAnaemiaAggregateDto.Breakdown();
+        breakdown.type = "by-state";
+        breakdown.states = stateList;
+        
+        return breakdown;
+    }
+
+    /**
+     * Gera breakdown por cidade quando a área é um estado específico.
+     * Agrupa observações por cidade e calcula métricas + série temporal para cada uma.
+     */
+    private GeoAnaemiaAggregateDto.Breakdown buildCityBreakdown(
+            List<Observation> inWindow,
+            List<Observation> inBaseline,
+            Instant from,
+            Instant to,
+            String state,
+            AnalyticsRunRequest req) {
+        
+        // Agrupar observações por cidade
+        Map<String, List<Observation>> byCity = inWindow.stream()
+                .filter(o -> o.getPatientData() != null && o.getPatientData().getCity() != null)
+                .collect(Collectors.groupingBy(o -> o.getPatientData().getCity()));
+
+        // Agrupar baseline por cidade
+        Map<String, List<Observation>> baselineByCity = inBaseline.stream()
+                .filter(o -> o.getPatientData() != null && o.getPatientData().getCity() != null)
+                .collect(Collectors.groupingBy(o -> o.getPatientData().getCity()));
+
+        List<GeoAnaemiaAggregateDto.CityBreakdown> cityList = new ArrayList<>();
+
+        for (Map.Entry<String, List<Observation>> entry : byCity.entrySet()) {
+            String city = entry.getKey();
+            List<Observation> cityObs = entry.getValue();
+            List<Observation> cityBaseline = baselineByCity.getOrDefault(city, Collections.emptyList());
+
+            // Calcular métricas da cidade
+            long total = cityObs.size();
+            long anaemic = cityObs.stream().filter(Observation::getHasAnaemia).count();
+            Double prevalence = total > 0 ? (double) anaemic / (double) total : 0.0;
+
+            long baselineTotal = cityBaseline.size();
+            long baselineAnaemic = cityBaseline.stream().filter(Observation::getHasAnaemia).count();
+            Double baselinePrevalence = baselineTotal > 0 ? (double) baselineAnaemic / (double) baselineTotal : 0.0;
+            Double deltaPrevalence = prevalence - baselinePrevalence;
+            Double deltaPercent = baselinePrevalence > 0 ? deltaPrevalence / baselinePrevalence : null;
+
+            String severity = classifySeverity(prevalence, deltaPercent, req);
+
+            // Criar objeto CityBreakdown
+            GeoAnaemiaAggregateDto.CityBreakdown cb = new GeoAnaemiaAggregateDto.CityBreakdown();
+            cb.city = city;
+            cb.state = state;
+            
+            cb.metrics = new GeoAnaemiaAggregateDto.Metrics();
+            cb.metrics.total = total;
+            cb.metrics.anaemic = anaemic;
+            cb.metrics.prevalence = prevalence;
+            cb.metrics.baselinePrevalence = baselinePrevalence;
+            cb.metrics.deltaPrevalence = deltaPrevalence;
+            cb.metrics.deltaPercent = deltaPercent;
+            cb.metrics.severity = severity;
+
+            // Série temporal por cidade
+            cb.timeSeries = buildBuckets(cityObs, from, to, req.bucket);
+
+            cityList.add(cb);
+        }
+
+        // Ordenar por total decrescente
+        cityList.sort((a, b) -> Long.compare(b.metrics.total, a.metrics.total));
+
+        GeoAnaemiaAggregateDto.Breakdown breakdown = new GeoAnaemiaAggregateDto.Breakdown();
+        breakdown.type = "by-city";
+        breakdown.cities = cityList;
+        
+        return breakdown;
     }
 }

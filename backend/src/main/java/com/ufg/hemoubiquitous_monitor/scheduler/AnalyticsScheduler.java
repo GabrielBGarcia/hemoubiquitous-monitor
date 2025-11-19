@@ -34,22 +34,22 @@ public class AnalyticsScheduler {
     private long analysisInterval;
     
     /**
-     * Executa análise periodicamente (padrão: a cada 60 segundos)
+     * Executa análise periodicamente (padrão: a cada 1 hora)
      * Intervalo configurável em application.properties: analytics.scheduler.analysis-interval
      * NOTA: Desabilitado por padrão durante desenvolvimento para não poluir o banco.
      * Para habilitar, configure analytics.scheduler.enabled=true
      */
     @Transactional
-    @Scheduled(fixedRateString = "${analytics.scheduler.analysis-interval:60000}")
+    @Scheduled(fixedRateString = "${analytics.scheduler.analysis-interval:3600000}")
     public void runPeriodicAnalysis() {
         logger.info(" [SCHEDULER] Iniciando análise periódica automática - {}", Instant.now());
         
         try {
             AnalyticsRunRequest request = new AnalyticsRunRequest();
-            request.window = "PT1H";  // Apenas 1 hora ao invés de 24h
-            request.bucket = "15m";   // Buckets de 15min (resultará em 4 registros)
+            request.window = "PT24H";  // Janela de 24 horas
+            request.bucket = "1h";     // Buckets de 1 hora (resultará em 24 registros)
             request.loinc = "718-7";
-            request.state = "GO";     // Especificar estado ao invés de global
+            request.state = null;      // Global (sem estado específico)
             
             analyticsService.runCycle(request);
             logger.info(" [SCHEDULER] Análise periódica concluída com sucesso");
