@@ -60,6 +60,7 @@ public class NotificationService {
         TopicManagementResponse response = firebaseMessaging
                 .subscribeToTopic(List.of(token), topic);
 
+
         if (response.getFailureCount() > 0) {
             System.out.println(response.getErrors());
             throw new FirebaseMessagingException("Falha ao inscrever no tópico");

@@ -8,8 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Configuration
 public class FirebaseConfig {
@@ -26,25 +25,18 @@ public class FirebaseConfig {
                 .setCredentials(googleCredentials)
                 .build();
 
-        if (FirebaseApp.getApps().isEmpty()) {
             return FirebaseApp.initializeApp(options);
-        } else {
-            return FirebaseApp.getInstance();
-        }
     }
 
     @Bean
     GoogleCredentials googleCredentials() throws IOException {
-        if (firebaseProperties.getServiceAccount() != null) {
             try (InputStream is = firebaseProperties.getServiceAccount().getInputStream()) {
-                return GoogleCredentials.fromStream(is);
-            }
-        }
-        else {
-            return GoogleCredentials.getApplicationDefault();
-        }
-    }
+                String content = new String(is.readAllBytes());
 
+                InputStream credentialsStream = new ByteArrayInputStream(content.getBytes());
+                return GoogleCredentials.fromStream(credentialsStream);
+            }
+    }
 
     @Bean
     public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) {

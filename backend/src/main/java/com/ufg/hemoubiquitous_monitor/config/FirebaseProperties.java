@@ -1,6 +1,7 @@
 package com.ufg.hemoubiquitous_monitor.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,8 @@ public class FirebaseProperties {
     }
 
     public void setServiceAccount(Resource serviceAccount) {
-        this.serviceAccount = serviceAccount;
+        this.serviceAccount = new ClassPathResource(
+                "hemoubiquitous-fhir-firebase-adminsdk-fbsvc-42a25b9c4b.json"
+        );
     }
 }

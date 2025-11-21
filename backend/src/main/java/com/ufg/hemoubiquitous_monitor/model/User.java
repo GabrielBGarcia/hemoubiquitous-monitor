@@ -28,19 +28,23 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UF uf;
 
+    private String city;
+
     public User() {}
 
-    public User(Long id, String nome, String uf) {
+    public User(Long id, String nome, String uf, String city) {
         this.id = id;
         this.nome = nome;
         this.uf = UF.valueOf(uf);
+        this.city = city;
     }
 
-    public User(String nome, String username, String password, String uf) {
+    public User(String nome, String username, String password, String uf, String city) {
         this.nome = nome;
         this.username = username;
         this.password = password;
         this.uf = UF.valueOf(uf);
+        this.city = city;
     }
 
     public Long getId() {
@@ -80,6 +84,14 @@ public class User implements UserDetails {
         return Objects.hash(id);
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -91,7 +103,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.uf.getSigla()));
+        String authorities = this.getCity().isBlank() ? this.uf.getSigla() : this.uf.getSigla() + "-" + this.city;
+        return List.of(new SimpleGrantedAuthority(authorities));
     }
 
     @Override

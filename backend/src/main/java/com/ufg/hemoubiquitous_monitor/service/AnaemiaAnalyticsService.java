@@ -153,7 +153,39 @@ public class AnaemiaAnalyticsService {
             // Breakdown por cidade quando área é um estado específico
             dto.breakdown = buildCityBreakdown(inWindow, inBaseline, from, to, req.state, req);
         }
-        
+
+
+        System.out.println("teste de nome de tópico: " + areaKey + areaType);
+
+        String alertStateMessage = "";
+
+        switch(severity){
+            case "none":
+                break;
+            case "minor":
+                alertStateMessage= "Os casos suspeitos de anemia estão aumentando";
+                break;
+            case "major":
+                alertStateMessage= "Os casos suspeitos de anemia estão elevados";
+                break;
+            case "critical":
+                alertStateMessage= "Os casos suspeitos de anemia estão em estado crítico";
+                break;
+        }
+
+        if(req.city != null && req.state != null)
+        notificationService.sendToTopic(
+                "anaemia-alerts"+ "-" + req.state + "-" + req.city,
+                alertStateMessage, "teste"
+//                String.format("Prevalência de %.1f%% detectada em %s", prevalence * 100)
+        );
+        else if(req.state != null)
+            notificationService.sendToTopic(
+                    "anaemia-alerts"+ "-" + req.state,
+                    alertStateMessage, "teste"
+//                    String.format("Prevalência de %.1f%% detectada em %s", prevalence * 100)
+            );
+
         GeoAnaemiaAggregateDto.Thresholds th = new GeoAnaemiaAggregateDto.Thresholds();
         th.thresholdPrevalence = req.thresholdPrevalence; th.thresholdTrendDelta = req.thresholdTrendDelta; th.clusterMinCases = req.clusterMinCases;
         dto.thresholdsUsed = th;
@@ -167,12 +199,6 @@ public class AnaemiaAnalyticsService {
                 data.put("deltaPercent", deltaPercent != null ? String.valueOf(deltaPercent) : "0");
                 data.put("total", String.valueOf(total));
                 data.put("anaemic", String.valueOf(anaemic));
-
-                notificationService.sendToTopic(
-                        "anaemia-alerts"+ "-" + areaKey,
-                        "Alerta de Anemia Crítico",
-                        String.format("Prevalência de %.1f%% detectada em %s", prevalence * 100)
-                );
 
             } catch (Exception e) {
                 System.err.println("Erro ao enviar notificação push: " + e.getMessage());
