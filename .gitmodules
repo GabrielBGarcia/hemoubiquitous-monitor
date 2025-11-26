@@ -1,0 +1,3 @@
+[submodule "hemapp"]
+	path = hemapp
+	url = https://github.com/MateusGandi/hemapp.git
