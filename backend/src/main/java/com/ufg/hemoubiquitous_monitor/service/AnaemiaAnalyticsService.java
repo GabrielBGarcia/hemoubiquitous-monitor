@@ -26,6 +26,69 @@ import java.util.stream.Collectors;
 
 @Service
 public class AnaemiaAnalyticsService {
+            /**
+             * Retorna todos os estados distintos presentes nas observações do período.
+             */
+            public Set<String> getDistinctStatesInPeriod(Date from, Date to) {
+                List<Observation> obsList = observationRepository.findByIssuedAtBetween(from, to);
+                Set<String> estados = new HashSet<>();
+                for (Observation obs : obsList) {
+                    if (obs.getPatientData() != null && obs.getPatientData().getState() != null) {
+                        estados.add(obs.getPatientData().getState());
+                    }
+                }
+                return estados;
+            }
+        /**
+         * Critérios OMS para anemia (sem gestantes):
+         * - Homens adultos: Hb < 13,0 g/dL
+         * - Mulheres adultas: Hb < 12,0 g/dL
+         * - Crianças 6m-5a: Hb < 11,0 g/dL
+         * - Crianças 5-12a: Hb < 11,5 g/dL
+         * - Adolescentes 12-15a: Hb < 12,0 g/dL
+         */
+        private boolean isAnaemicByOmsCriteria(Observation obs) {
+            if (obs == null || obs.getHaemoglobinInGramsPerLitre() == null || obs.getPatientData() == null) return false;
+            double hb = obs.getHaemoglobinInGramsPerLitre();
+            PatientData pd = obs.getPatientData();
+            String gender = pd.getGender() != null ? pd.getGender().toLowerCase() : "";
+            Date birthDate = pd.getBirthDate();
+            int age = -1;
+            if (birthDate != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(birthDate);
+                int birthYear = cal.get(Calendar.YEAR);
+                int birthMonth = cal.get(Calendar.MONTH);
+                int birthDay = cal.get(Calendar.DAY_OF_MONTH);
+                Calendar now = Calendar.getInstance();
+                int years = now.get(Calendar.YEAR) - birthYear;
+                if (now.get(Calendar.MONTH) < birthMonth || (now.get(Calendar.MONTH) == birthMonth && now.get(Calendar.DAY_OF_MONTH) < birthDay)) {
+                    years--;
+                }
+                age = years;
+            }
+
+            // Crianças (valores em g/L)
+            if (age >= 0 && age < 5) {
+                return hb < 110.0;
+            }
+            if (age >= 5 && age < 12) {
+                return hb < 115.0;
+            }
+            if (age >= 12 && age < 15) {
+                return hb < 120.0;
+            }
+            // Mulheres adultas (>=15 anos)
+            if (gender.startsWith("f") && age >= 15) {
+                return hb < 120.0;
+            }
+            // Homens adultos (>=15 anos)
+            if (gender.startsWith("m") && age >= 15) {
+                return hb < 130.0;
+            }
+            // Default: não anêmico
+            return false;
+        }
     @Autowired private ObservationRepository observationRepository;
     @Autowired private AnaemiaGeoAggregateRepository aggregateRepository;
     @Autowired private NotificationService notificationService;
@@ -35,6 +98,7 @@ public class AnaemiaAnalyticsService {
      * Executa um ciclo de análise espaço-temporal.
      * Chamado automaticamente pelo scheduler ou manualmente via endpoint.
      */
+    @org.springframework.transaction.annotation.Transactional
     public GeoAnaemiaAggregateDto runCycle(AnalyticsRunRequest req) {
         // 1) Determinar janela (from/to) caso só tenha window (ex.: PT24H)
         Instant now = Instant.now();
@@ -52,6 +116,11 @@ public class AnaemiaAnalyticsService {
 
         // 4) Buscar exames no período
         List<Observation> observations = observationRepository.findByIssuedAtBetween(Date.from(from), Date.from(to));
+        // Aplica classificação OMS para anemia
+        for (Observation obs : observations) {
+            boolean anaemia = isAnaemicByOmsCriteria(obs);
+            obs.setHasAnaemia(anaemia);
+        }
         List<Observation> inWindow = observations.stream()
             .filter(o -> matchArea(o.getPatientData(), req))
             .filter(o -> matchLoinc(o.getCode(), req.loinc))
@@ -59,10 +128,22 @@ public class AnaemiaAnalyticsService {
 
         // Para baseline, consulta de janela anterior
         List<Observation> baselineCandidates = observationRepository.findByIssuedAtBetween(Date.from(baselineFrom), Date.from(baselineTo));
+        Calendar nowBaseline = Calendar.getInstance();
+        for (Observation obs : baselineCandidates) {
+            boolean anaemia = isAnaemicByOmsCriteria(obs);
+            obs.setHasAnaemia(anaemia);
+        }
         List<Observation> inBaseline = baselineCandidates.stream()
             .filter(o -> matchArea(o.getPatientData(), req))
             .filter(o -> matchLoinc(o.getCode(), req.loinc))
             .collect(Collectors.toList());
+        // Critérios OMS para anemia (sem gestantes):
+        // - Homens adultos: Hb < 13,0 g/dL
+        // - Mulheres adultas: Hb < 12,0 g/dL
+        // - Crianças 6m-5a: Hb < 11,0 g/dL
+        // - Crianças 5-12a: Hb < 11,5 g/dL
+        // - Adolescentes 12-15a: Hb < 12,0 g/dL
+        // Removido duplicação: baselineCandidates/inBaseline
 
         // 5) Cálculo simples de métricas agregadas do período
         long total = inWindow.size();

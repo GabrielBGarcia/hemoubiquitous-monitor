@@ -45,14 +45,30 @@ public class AnalyticsScheduler {
         logger.info(" [SCHEDULER] Iniciando análise periódica automática - {}", Instant.now());
         
         try {
-            AnalyticsRunRequest request = new AnalyticsRunRequest();
-            request.window = "PT24H";  // Janela de 24 horas
-            request.bucket = "1h";     // Buckets de 1 hora (resultará em 24 registros)
-            request.loinc = "718-7";
-            request.state = null;      // Global (sem estado específico)
-            
-            analyticsService.runCycle(request);
-            logger.info(" [SCHEDULER] Análise periódica concluída com sucesso");
+            // 1. Análise global
+            AnalyticsRunRequest globalRequest = new AnalyticsRunRequest();
+            globalRequest.window = "PT1H"; // janela de 1 hora
+            globalRequest.bucket = "15m"; // bucket de 15 minutos
+            globalRequest.loinc = "718-7";
+            globalRequest.state = null;
+            analyticsService.runCycle(globalRequest);
+            logger.info(" [SCHEDULER] Análise global concluída");
+
+            // 2. Buscar todos os estados presentes nas observações do período
+            Instant now = Instant.now();
+            Instant to = now;
+            Instant from = to.minus(java.time.Duration.parse("PT24H"));
+            java.util.Set<String> estados = analyticsService.getDistinctStatesInPeriod(java.util.Date.from(from), java.util.Date.from(to));
+            // 3. Executar análise para cada estado
+            for (String uf : estados) {
+                AnalyticsRunRequest stateRequest = new AnalyticsRunRequest();
+                stateRequest.window = "PT1H"; // janela de 1 hora
+                stateRequest.bucket = "15m"; // bucket de 15 minutos
+                stateRequest.loinc = "718-7";
+                stateRequest.state = uf;
+                analyticsService.runCycle(stateRequest);
+                logger.info(" [SCHEDULER] Análise periódica concluída para estado: {}", uf);
+            }
         } catch (Exception e) {
             logger.error(" [SCHEDULER] Erro ao executar análise periódica: {}", e.getMessage(), e);
         }

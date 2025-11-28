@@ -21,11 +21,14 @@ public class FirebaseConfig {
 
     @Bean
     public FirebaseApp firebaseApp(GoogleCredentials googleCredentials) throws IOException {
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(googleCredentials)
-                .build();
-
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(googleCredentials)
+                    .build();
             return FirebaseApp.initializeApp(options);
+        } else {
+            return FirebaseApp.getInstance();
+        }
     }
 
     @Bean
